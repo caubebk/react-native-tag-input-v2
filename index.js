@@ -17,6 +17,7 @@ import {
   ScrollView,
   Platform,
 } from 'react-native';
+import { ViewPropTypes, TextPropTypes } from 'deprecated-react-native-prop-types';
 import invariant from 'invariant';
 
 const windowWidth = Dimensions.get('window').width;
@@ -93,9 +94,8 @@ type OptionalProps = {
   onHeightChange?: (height: number) => void,
   /**
    * Any ScrollView props (horizontal, showsHorizontalScrollIndicator, etc.)
-   */
+  */
   scrollViewProps?: $PropertyType<ScrollView, 'props'>,
-  showCross: boolean,
 };
 type Props<T> = RequiredProps<T> & OptionalProps;
 type State = {
@@ -114,15 +114,14 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     editable: PropTypes.bool,
     tagColor: PropTypes.string,
     tagTextColor: PropTypes.string,
-    tagContainerStyle: PropTypes.object,
-    tagTextStyle: Text.propTypes.style,
+    tagContainerStyle: ViewPropTypes.style,
+    tagTextStyle: TextPropTypes.style,
     inputDefaultWidth: PropTypes.number,
     inputColor: PropTypes.string,
     inputProps: PropTypes.shape(TextInput.propTypes),
     maxHeight: PropTypes.number,
     onHeightChange: PropTypes.func,
     scrollViewProps: PropTypes.shape(ScrollView.propTypes),
-    showCross: PropTypes.bool,
   };
   props: Props<T>;
   state: State;
@@ -141,7 +140,6 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     inputDefaultWidth: 90,
     inputColor: '#777777',
     maxHeight: 75,
-    showCross: true,
   };
 
   static inputWidth(
@@ -167,7 +165,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     }
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps: Props<T>) {
+  componentWillReceiveProps(nextProps: Props<T>) {
     const inputWidth = TagInput.inputWidth(
       nextProps.text,
       this.spaceLeft,
@@ -186,7 +184,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     }
   }
 
-  UNSAFE_componentWillUpdate(nextProps: Props<T>, nextState: State) {
+  componentWillUpdate(nextProps: Props<T>, nextState: State) {
     if (
       this.props.onHeightChange &&
       nextState.wrapperHeight !== this.state.wrapperHeight
@@ -260,7 +258,6 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
         tagTextStyle={this.props.tagTextStyle}
         key={index}
         editable={this.props.editable}
-        showCross={this.props.showCross}
       />
     ));
 
@@ -367,7 +364,6 @@ type TagProps = {
   tagTextColor: string,
   tagContainerStyle?: StyleObj,
   tagTextStyle?: StyleObj,
-  showCross: boolean,
 };
 class Tag extends React.PureComponent<TagProps> {
 
@@ -381,13 +377,12 @@ class Tag extends React.PureComponent<TagProps> {
     removeIndex: PropTypes.func.isRequired,
     tagColor: PropTypes.string.isRequired,
     tagTextColor: PropTypes.string.isRequired,
-    tagContainerStyle: PropTypes.object,
-    tagTextStyle: PropTypes.object,
-    showCross: PropTypes.bool.isRequired,
+    tagContainerStyle: ViewPropTypes.style,
+    tagTextStyle: TextPropTypes.style,
   };
   curPos: ?number = null;
 
-  UNSAFE_componentWillReceiveProps(nextProps: TagProps) {
+  componentWillReceiveProps(nextProps: TagProps) {
     if (
       !this.props.isLastTag &&
       nextProps.isLastTag &&
@@ -403,28 +398,16 @@ class Tag extends React.PureComponent<TagProps> {
     if (React.isValidElement(this.props.label)) {
       tagLabel = this.props.label;
     } else {
-      if (this.props.showCross === true) {
-        tagLabel = (
-          <Text style={[
+      tagLabel = (
+        <Text style={[
             styles.tagText,
             { color: this.props.tagTextColor },
             this.props.tagTextStyle,
           ]}>
             {this.props.label}
             &nbsp;&times;
-          </Text>
-        );
-      } else {
-        tagLabel = (
-          <Text style={[
-            styles.tagText,
-            { color: this.props.tagTextColor },
-            this.props.tagTextStyle,
-          ]}>
-            {this.props.label}
-          </Text>
-        );
-      }
+        </Text>
+      );
     }
     return (
       <TouchableOpacity
